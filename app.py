@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify, render_template
 import socket
 import json
+from flask_cors import CORS
 app = Flask(__name__)
+CORS(app, resources=r'/*')
 client_socket = socket.socket
 hostname = '127.0.0.1'
-port = 8080
+port = 14444
 
 
 @app.route('/Register', methods=['POST'])
@@ -198,6 +200,42 @@ def get_waiting_info():
     return message
 
 
+@app.route('/GetSysTime', methods=['POST'])
+def get_sys_time():
+    socket_init()
+    print("get system time")
+    message = ['__GetSysTime']
+    send_message(json.dumps(message))
+    message = recv_message()
+    close_socket()
+    return message
+
+
+@app.route('/BreakDownPile', methods=['POST'])
+def break_down_pile():
+    socket_init()
+    print("break down pile")
+    data = request.get_json()
+    pile_no = data['pile_no']
+    action = data['action']
+    message = ['__PileBreakDown', pile_no, action]
+    send_message(json.dumps(message))
+    message = recv_message()
+    close_socket()
+    return message
+
+
+@app.route('/ResetSysTime', methods=['POST'])
+def reset_sys_time():
+    socket_init()
+    print("reset system time")
+    message = ['__ResetTime']
+    send_message(json.dumps(message))
+    message = recv_message()
+    close_socket()
+    return message
+
+
 @app.route('/', methods=['GET'])
 def homepage():
     print("hello")
@@ -233,4 +271,4 @@ def recv_message():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8000)
+    app.run(debug=True, port=8000, host='0.0.0.0')
